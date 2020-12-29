@@ -1,69 +1,66 @@
 package BattleshipFX.service;
 
 import BattleshipFX.model.Player;
+import BattleshipFX.model.PlayerEnum;
+import BattleshipFX.model.Ship;
+import BattleshipFX.model.ShipCell;
+
+import java.util.List;
 
 
 public class PlayerService {
     Player player1 = new Player();
     Player player2 = new Player();
-    Player currentPlayer = new Player();
-    Player nextPlayer = new Player();
 
     public void start() {
         player1.clearAll();
         player2.clearAll();
     }
 
-    public void setCurrentPlayer(int playerNum) {
-        currentPlayer = player1;
-        nextPlayer = player2;
-        if (playerNum == 2) {
-            currentPlayer = player2;
-            nextPlayer = player1;
-        }
+    public Player getCurrentPlayer(PlayerEnum playerNum) {
+        if (playerNum == PlayerEnum.FIRST) return player1;
+        else return player2;
     }
 
-    public void addShip(int x, int y, int shipSize, boolean bVertical, int playerNum) {
-        setCurrentPlayer(playerNum);
+    public Player getNextPlayer(PlayerEnum playerNum) {
+        if (playerNum == PlayerEnum.FIRST) return player2;
+        else return player1;
+    }
+
+    public void addShip(int x, int y, int shipSize, boolean bVertical, PlayerEnum playerNum) {
+        Player currentPlayer = getCurrentPlayer(playerNum);
         currentPlayer.increaseShipsCount(shipSize);
+        Ship ship = new Ship();
         if (bVertical) {
             for (int cY = y; cY <= y + shipSize - 1; cY++) {
-                currentPlayer.setShipsCell(x, cY);
+                currentPlayer.setShipsCell(x, cY, ship);
             }
         } else {
             for (int cX = x; cX <= x + shipSize - 1; cX++) {
-                currentPlayer.setShipsCell(cX, y);
+                currentPlayer.setShipsCell(cX, y, ship);
             }
         }
+        currentPlayer.addShipToList(ship);
     }
 
-    public void doAttack(int x, int y, int playerNum) {
-        setCurrentPlayer(playerNum);
+    public void doAttack(int x, int y, PlayerEnum playerNum) {
+        Player currentPlayer = getCurrentPlayer(playerNum);
+        Player nextPlayer = getNextPlayer(playerNum);
         boolean bHit = nextPlayer.getShipsCell(x, y) != null;
+        if (bHit) nextPlayer.getShipsCell(x, y).setbHit(bHit);
         currentPlayer.setAttack(x, y, bHit);
-        nextPlayer.setEnemyAttack(x, y, bHit);
     }
 
-    public boolean isAttack(int x, int y, int playerNum) {
-        setCurrentPlayer(playerNum);
-        return (currentPlayer.getAttackCell(x, y) != null);
+    public boolean isAttack(int x, int y, PlayerEnum playerNum) {
+        return getCurrentPlayer(playerNum).getAttackCell(x, y) != null;
     }
 
-    public boolean getAttackHit(int x, int y, int playerNum) {
-        setCurrentPlayer(playerNum);
-        return currentPlayer.getAttackCell(x, y).isbHit();
+    public boolean isShipCell(int x, int y, PlayerEnum playerNum) {
+        return getCurrentPlayer(playerNum).getShipsCell(x, y) != null;
     }
 
-    public boolean isShipCell(int x, int y, int playerNum) {
-        setCurrentPlayer(playerNum);
-        return (currentPlayer.getShipsCell(x, y) != null);
-    }
-
-    public boolean canAddShip(int x, int y, int shipSize, boolean bVertical, int playerNum) {
-        currentPlayer = player1;
-        if (playerNum == 2) {
-            currentPlayer = player2;
-        }
+    public boolean canAddShip(int x, int y, int shipSize, boolean bVertical, PlayerEnum playerNum) {
+        Player currentPlayer = getCurrentPlayer(playerNum);
         if (currentPlayer.getShipCount(shipSize) > 4 - shipSize) return false;
         if (x >= 0 && x <= 9 && y >= 0 && y <= 9) {
             boolean isShip = false;
@@ -92,6 +89,35 @@ public class PlayerService {
             }
         }
         return false;
+    }
+
+    public boolean isPlayerLoss(PlayerEnum player) {
+        return getCurrentPlayer(player).loss();
+    }
+
+    public boolean isShipSunk(int x, int y, PlayerEnum player) {
+        return getCurrentPlayer(player).getShipsCell(x, y).getShip().isShipSunk();
+    }
+
+    public void doShipSunk(int x, int y, PlayerEnum player) {
+        Ship ship = getCurrentPlayer(player).getShipsCell(x, y).getShip();
+        List<ShipCell> shipCells = ship.getListOfShipCells();
+        for (ShipCell sc : shipCells) {
+            int x0 = sc.getX();
+            int y0 = sc.getY();
+            doAttack(x0 + 1, y0 + 1, player);
+            doAttack(x0 + 1, y0, player);
+            doAttack(x0 + 1, y0 - 1, player);
+            doAttack(x0, y0 + 1, player);
+            doAttack(x0, y0 - 1, player);
+            doAttack(x0 - 1, y0 + 1, player);
+            doAttack(x0 - 1, y0, player);
+            doAttack(x0 - 1, y0 - 1, player);
+        }
+    }
+    public List<ShipCell> getListOfShipCells(int x, int y, PlayerEnum player){
+        Ship ship = getCurrentPlayer(player).getShipsCell(x, y).getShip();
+        return ship.getListOfShipCells();
     }
 }
 

@@ -1,6 +1,8 @@
 package BattleshipFX.view;
 
 
+import BattleshipFX.model.PlayerEnum;
+import BattleshipFX.model.ShipCell;
 import BattleshipFX.service.PlayerService;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -17,6 +19,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.util.List;
+
 
 public class Main extends Application {
     private double mouseX, mouseY;
@@ -25,6 +29,7 @@ public class Main extends Application {
     private boolean bTripleDeck = false;
     private boolean bQuadroDeck = false;
     private boolean bHorizontal = true;
+    private boolean bGameOver = false;
     PlayerService ps = new PlayerService();
 
     @Override
@@ -142,9 +147,9 @@ public class Main extends Application {
             alert.setHeaderText("Игроку №1 приготовиться");
             alert.showAndWait();
             drawShapes2(gc4);
-            drawShips(gc4, 1);
+            drawShips(gc4, PlayerEnum.FIRST);
             drawShapes2(gc5);
-            drawShips(gc5, 2);
+            drawShips(gc5, PlayerEnum.SECOND);
             primaryStage.setScene(scene4);
             primaryStage.show();
 
@@ -173,15 +178,15 @@ public class Main extends Application {
             int x = getShipX(mouseX);
             int y = getShipY(mouseY);
             if (bSingleDeck) {
-                if (ps.canAddShip(x, y, 1, !bHorizontal, 1)) {
-                    ps.addShip(x, y, 1, !bHorizontal, 1);
+                if (ps.canAddShip(x, y, 1, !bHorizontal, PlayerEnum.FIRST)) {
+                    ps.addShip(x, y, 1, !bHorizontal, PlayerEnum.FIRST);
                     drawCell(gc2, mouseX, mouseY);
                 }
             }
             bSingleDeck = singleDeck(gc2, mouseX, mouseY);
             if (bDoubleDeck) {
-                if (ps.canAddShip(x, y, 2, !bHorizontal, 1)) {
-                    ps.addShip(x, y, 2, !bHorizontal, 1);
+                if (ps.canAddShip(x, y, 2, !bHorizontal, PlayerEnum.FIRST)) {
+                    ps.addShip(x, y, 2, !bHorizontal, PlayerEnum.FIRST);
                     if (bHorizontal) {
                         for (int i = 0; i < 2; i++) {
                             drawCell(gc2, mouseX, mouseY);
@@ -197,8 +202,8 @@ public class Main extends Application {
             }
             bDoubleDeck = doubleDeck(gc2, mouseX, mouseY);
             if (bTripleDeck) {
-                if (ps.canAddShip(x, y, 3, !bHorizontal, 1)) {
-                    ps.addShip(x, y, 3, !bHorizontal, 1);
+                if (ps.canAddShip(x, y, 3, !bHorizontal, PlayerEnum.FIRST)) {
+                    ps.addShip(x, y, 3, !bHorizontal, PlayerEnum.FIRST);
                     if (bHorizontal) {
                         for (int i = 0; i < 3; i++) {
                             drawCell(gc2, mouseX, mouseY);
@@ -214,8 +219,8 @@ public class Main extends Application {
             }
             bTripleDeck = tripleDeck(gc2, mouseX, mouseY);
             if (bQuadroDeck) {
-                if (ps.canAddShip(x, y, 4, !bHorizontal, 1)) {
-                    ps.addShip(x, y, 4, !bHorizontal, 1);
+                if (ps.canAddShip(x, y, 4, !bHorizontal, PlayerEnum.FIRST)) {
+                    ps.addShip(x, y, 4, !bHorizontal, PlayerEnum.FIRST);
                     if (bHorizontal) {
                         for (int i = 0; i < 4; i++) {
                             drawCell(gc2, mouseX, mouseY);
@@ -252,15 +257,15 @@ public class Main extends Application {
             int x = getShipX(mouseX);
             int y = getShipY(mouseY);
             if (bSingleDeck) {
-                if (ps.canAddShip(x, y, 1, !bHorizontal, 2)) {
-                    ps.addShip(x, y, 1, !bHorizontal, 2);
+                if (ps.canAddShip(x, y, 1, !bHorizontal, PlayerEnum.SECOND)) {
+                    ps.addShip(x, y, 1, !bHorizontal, PlayerEnum.SECOND);
                     drawCell(gc3, mouseX, mouseY);
                 }
             }
             bSingleDeck = singleDeck(gc3, mouseX, mouseY);
             if (bDoubleDeck) {
-                if (ps.canAddShip(x, y, 2, !bHorizontal, 2)) {
-                    ps.addShip(x, y, 2, !bHorizontal, 2);
+                if (ps.canAddShip(x, y, 2, !bHorizontal, PlayerEnum.SECOND)) {
+                    ps.addShip(x, y, 2, !bHorizontal, PlayerEnum.SECOND);
                     if (bHorizontal) {
                         for (int i = 0; i < 2; i++) {
                             drawCell(gc3, mouseX, mouseY);
@@ -276,8 +281,8 @@ public class Main extends Application {
             }
             bDoubleDeck = doubleDeck(gc3, mouseX, mouseY);
             if (bTripleDeck) {
-                if (ps.canAddShip(x, y, 3, !bHorizontal, 2)) {
-                    ps.addShip(x, y, 3, !bHorizontal, 2);
+                if (ps.canAddShip(x, y, 3, !bHorizontal, PlayerEnum.SECOND)) {
+                    ps.addShip(x, y, 3, !bHorizontal, PlayerEnum.SECOND);
                     if (bHorizontal) {
                         for (int i = 0; i < 3; i++) {
                             drawCell(gc3, mouseX, mouseY);
@@ -293,8 +298,8 @@ public class Main extends Application {
             }
             bTripleDeck = tripleDeck(gc3, mouseX, mouseY);
             if (bQuadroDeck) {
-                if (ps.canAddShip(x, y, 4, !bHorizontal, 2)) {
-                    ps.addShip(x, y, 4, !bHorizontal, 2);
+                if (ps.canAddShip(x, y, 4, !bHorizontal, PlayerEnum.SECOND)) {
+                    ps.addShip(x, y, 4, !bHorizontal, PlayerEnum.SECOND);
                     if (bHorizontal) {
                         for (int i = 0; i < 4; i++) {
                             drawCell(gc3, mouseX, mouseY);
@@ -324,29 +329,64 @@ public class Main extends Application {
         }));
 
         canvas4.setOnMouseClicked(event -> {
-            mouseX = event.getX();
-            mouseY = event.getY();
-            if (mouseX > 450 && mouseX < 650 && mouseY > 100 && mouseY < 300) {
-                boolean bHit = false;
-                int x = getAttackX(mouseX);
-                int y = getAttackY(mouseY);
-                if (!ps.isAttack(x, y, 1)) {
-                    ps.doAttack(x, y, 1);
-                    bHit = ps.isShipCell(x, y, 2);
-                    attack(gc4, mouseX, mouseY, bHit);
-                    enemyAttack(gc5,mouseX,mouseY,bHit);
-                    if (!bHit) {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Промах");
-                        alert.setHeaderText("Промах!");
-                        alert.showAndWait();
-                        root4.setVisible(false);
-                        alert.setTitle("Смена игрока");
-                        alert.setHeaderText("Игроку №2 приготовиться");
-                        alert.showAndWait();
-                        root5.setVisible(true);
-                        primaryStage.setScene(scene5);
-                        primaryStage.show();
+            if (!bGameOver) {
+                mouseX = event.getX();
+                mouseY = event.getY();
+                if (mouseX > 450 && mouseX < 650 && mouseY > 100 && mouseY < 300) {
+                    boolean bHit;
+                    int x = getAttackX(mouseX);
+                    int y = getAttackY(mouseY);
+                    if (!ps.isAttack(x, y, PlayerEnum.FIRST)) {
+                        ps.doAttack(x, y, PlayerEnum.FIRST);
+                        bHit = ps.isShipCell(x, y, PlayerEnum.SECOND);
+                        attack(gc4, mouseX, mouseY, bHit);
+                        enemyAttack(gc5, mouseX, mouseY, bHit);
+                        if (bHit) {
+                            if (ps.isShipSunk(x, y, PlayerEnum.SECOND)) {
+                                ps.doShipSunk(x, y, PlayerEnum.SECOND);
+                                List<ShipCell> listOfShipCells = ps.getListOfShipCells(x, y, PlayerEnum.SECOND);
+                                for (ShipCell sc : listOfShipCells) {
+                                    int x0 = sc.getX();
+                                    int y0 = sc.getY();
+                                    int mouseX0 = x0 * 20 + 450 + 5;
+                                    int mouseY0 = y0 * 20 + 100 + 5;
+                                    attack(gc4, mouseX0, mouseY0, false);
+                                    attack(gc4, mouseX0 + 20, mouseY0 + 20, false);
+                                    attack(gc4, mouseX0 + 20, mouseY0, !bHit);
+                                    attack(gc4, mouseX0 + 20, mouseY0 - 20, !bHit);
+                                    attack(gc4, mouseX0, mouseY0 + 20, !bHit);
+                                    attack(gc4, mouseX0, mouseY0 - 20, !bHit);
+                                    attack(gc4, mouseX0 - 20, mouseY0 + 20, !bHit);
+                                    attack(gc4, mouseX0 - 20, mouseY0, !bHit);
+                                    attack(gc4, mouseX0 - 20, mouseY0 - 20, !bHit);
+                                }
+                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                alert.setTitle("корабль подбит");
+                                alert.setHeaderText("корабль подбит");
+                                alert.showAndWait();
+
+                            }
+                        }
+                        if (ps.isPlayerLoss(PlayerEnum.SECOND)) {
+                            bGameOver =true;
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Конец игры");
+                            alert.setHeaderText("Игрок №1 выиграл");
+                            alert.showAndWait();
+                        }
+                        if (!bHit) {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Промах");
+                            alert.setHeaderText("Промах!");
+                            alert.showAndWait();
+                            root4.setVisible(false);
+                            alert.setTitle("Смена игрока");
+                            alert.setHeaderText("Игроку №2 приготовиться");
+                            alert.showAndWait();
+                            root5.setVisible(true);
+                            primaryStage.setScene(scene5);
+                            primaryStage.show();
+                        }
                     }
                 }
             }
@@ -354,17 +394,25 @@ public class Main extends Application {
 
 
         canvas5.setOnMouseClicked(event -> {
+            if(!bGameOver){
             mouseX = event.getX();
             mouseY = event.getY();
             if (mouseX > 450 && mouseX < 650 && mouseY > 100 && mouseY < 300) {
                 boolean bHit;
                 int x = getAttackX(mouseX);
                 int y = getAttackY(mouseY);
-                if (!ps.isAttack(x, y, 2)) {
-                    ps.doAttack(x, y, 2);
-                    bHit = ps.isShipCell(x, y, 1);
+                if (!ps.isAttack(x, y, PlayerEnum.SECOND)) {
+                    ps.doAttack(x, y, PlayerEnum.SECOND);
+                    bHit = ps.isShipCell(x, y, PlayerEnum.FIRST);
                     attack(gc5, mouseX, mouseY, bHit);
                     enemyAttack(gc4, mouseX, mouseY, bHit);
+                    if (ps.isPlayerLoss(PlayerEnum.FIRST)) {
+                        bGameOver = true;
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Конец игры");
+                        alert.setHeaderText("Игрок №2 выиграл");
+                        alert.showAndWait();
+                    }
                     if (!bHit) {
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Промах");
@@ -379,7 +427,7 @@ public class Main extends Application {
                         primaryStage.show();
                     }
                 }
-            }
+            }}
         });
 
         primaryStage.show();
@@ -542,7 +590,7 @@ public class Main extends Application {
                 gc.setFill(Color.GREEN);
                 gc.fillRect(rect_x + 50, rect_y + 100, w - 12, w - 12);
             } else {
-                int rect_x = i * w-400;
+                int rect_x = i * w - 400;
                 int rect_y = j * w;
                 gc.setFill(Color.RED);
                 gc.fillRect(rect_x + 50, rect_y + 100, w, w);
@@ -559,7 +607,7 @@ public class Main extends Application {
         return (int) (mouseY - 100) / 20;
     }
 
-    private void drawShips(GraphicsContext gc, int playerNum) {
+    private void drawShips(GraphicsContext gc, PlayerEnum playerNum) {
         gc.setFill(Color.GREEN);
         for (int x = 0; x <= 9; x++) {
             for (int y = 0; y <= 9; y++) {
@@ -568,28 +616,6 @@ public class Main extends Application {
                 }
             }
         }
-       /* int nextPlayerNum = 1;
-        if (playerNum == 1) {
-            nextPlayerNum = 2;
-        }
-        for (int x = 0; x <= 9; x++) {
-            for (int y = 0; y <= 9; y++) {
-                if (ps.isAttack(x, y, nextPlayerNum)) {
-                    if (ps.getAttackHit(x, y, nextPlayerNum)) {
-                        int rect_x = x * 20;
-                        int rect_y = y * 20;
-                        gc.setFill(Color.RED);
-                        gc.fillRect(rect_x + 50, rect_y + 100, 20, 20);
-                    } else {
-                        int rect_x = x * 20 + 6;
-                        int rect_y = y * 20 + 6;
-                        gc.setFill(Color.GREEN);
-                        gc.fillRect(rect_x + 50, rect_y + 100, 20 - 12, 20 - 12);
-
-                    }
-                }
-            }
-        }*/
     }
 
     private int getAttackX(double mouseX) {
@@ -600,12 +626,3 @@ public class Main extends Application {
         return (int) (mouseY - 100) / 20;
     }
 }
-
-
-/*for (int x = 0; x < 10; x++) {
-            for (int y = 0; y < 10; y++) {
-                if (!game.getBlueGrid().isEmptyForInt(x, y)) {
-                    gc.fillRect(50 + x * 20, 100 + y * 20, 20, 20);
-                }
-            }
-        }*/

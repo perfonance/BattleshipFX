@@ -3,25 +3,33 @@ package BattleshipFX.model;
 public class ShipCell {
     private int x;
     private int y;
+    private boolean bHit = false;
 
-    public ShipCell(int x, int y) {
+    private Ship ship;
+
+    public ShipCell(int x, int y, Ship ship) {
         this.x = x;
         this.y = y;
+        this.ship = ship;
+    }
+
+    public Ship getShip() {
+        return ship;
     }
 
     public int getX() {
         return x;
     }
 
-    public void setX(int x) {
-        this.x = x;
-    }
-
     public int getY() {
         return y;
     }
 
-    public void setY(int y) {
-        this.y = y;
+    public void setbHit(boolean bHit) {
+        this.bHit = bHit;
+    }
+
+    public boolean isbHit() {
+        return bHit;
     }
 }
