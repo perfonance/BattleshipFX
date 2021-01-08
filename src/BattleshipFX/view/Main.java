@@ -19,7 +19,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class Main extends Application {
@@ -31,33 +33,15 @@ public class Main extends Application {
     private boolean bHorizontal = true;
     private boolean bGameOver = false;
     PlayerService ps = new PlayerService();
+    private Map<Integer, Group> roots = new HashMap<>();
+    private Map<Integer, Scene> scenes = new HashMap<>();
+    private Map<Integer, Canvas> canvases = new HashMap<>();
 
     @Override
     public void start(Stage primaryStage) {
         ps.start();
-        Group root1 = new Group();
-        Group root2 = new Group();
-        Group root3 = new Group();
-        Group root4 = new Group();
-        Group root5 = new Group();
 
-        Scene scene1 = new Scene(root1);
-        Scene scene2 = new Scene(root2);
-        Scene scene3 = new Scene(root3);
-        Scene scene4 = new Scene(root4);
-        Scene scene5 = new Scene(root5);
-
-        Canvas canvas1 = new Canvas(800, 600);
-        Canvas canvas2 = new Canvas(800, 600);
-        Canvas canvas3 = new Canvas(800, 600);
-        Canvas canvas4 = new Canvas(800, 600);
-        Canvas canvas5 = new Canvas(800, 600);
-
-        root1.getChildren().add(canvas1);
-        root2.getChildren().add(canvas2);
-        root3.getChildren().add(canvas3);
-        root4.getChildren().add(canvas4);
-        root5.getChildren().add(canvas5);
+        initRoots();
 
         primaryStage.setTitle("BattleShip");
 
@@ -97,10 +81,10 @@ public class Main extends Application {
         buttonNextScene3.setText("Далее");
 
 
-        GraphicsContext gc2 = canvas2.getGraphicsContext2D();
-        GraphicsContext gc3 = canvas3.getGraphicsContext2D();
-        GraphicsContext gc4 = canvas4.getGraphicsContext2D();
-        GraphicsContext gc5 = canvas5.getGraphicsContext2D();
+        GraphicsContext gc2 = canvases.get(2).getGraphicsContext2D();
+        GraphicsContext gc3 = canvases.get(3).getGraphicsContext2D();
+        GraphicsContext gc4 = canvases.get(4).getGraphicsContext2D();
+        GraphicsContext gc5 = canvases.get(5).getGraphicsContext2D();
         drawShapes(gc2);
 
 
@@ -117,31 +101,31 @@ public class Main extends Application {
 
 
         EventHandler<MouseEvent> eventButtonStartClicked = e -> {
-            root1.getChildren().clear();
+            roots.get(1).getChildren().clear();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Расстановка кораблей");
             alert.setHeaderText("Игроку №1 приготовиться");
             alert.showAndWait();
-            primaryStage.setScene(scene2);
+            primaryStage.setScene(scenes.get(2));
             primaryStage.show();
         };
 
 
         EventHandler<MouseEvent> eventButtonNextScene2 = e -> {
-            root2.getChildren().clear();
+            roots.get(2).getChildren().clear();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Расстановка кораблей");
             alert.setHeaderText("Игроку №2 приготовиться");
             alert.showAndWait();
             drawShapes(gc3);
-            primaryStage.setScene(scene3);
+            primaryStage.setScene(scenes.get(3));
             primaryStage.show();
 
         };
 
 
         EventHandler<MouseEvent> eventButtonNextScene3 = e -> {
-            root3.getChildren().clear();
+            roots.get(3).getChildren().clear();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Начало боя");
             alert.setHeaderText("Игроку №1 приготовиться");
@@ -150,7 +134,7 @@ public class Main extends Application {
             drawShips(gc4, PlayerEnum.FIRST);
             drawShapes2(gc5);
             drawShips(gc5, PlayerEnum.SECOND);
-            primaryStage.setScene(scene4);
+            primaryStage.setScene(scenes.get(4));
             primaryStage.show();
 
         };
@@ -160,274 +144,57 @@ public class Main extends Application {
         buttonStart.setOnMouseClicked(eventButtonStartClicked);
         buttonNextScene2.setOnMouseClicked(eventButtonNextScene2);
         buttonNextScene3.setOnMouseClicked(eventButtonNextScene3);
-        root1.getChildren().add(labelEntryText);
-        root1.getChildren().add(buttonRules);
-        root1.getChildren().add(buttonStart);
-        root2.getChildren().add(buttonNextScene2);
-        root2.getChildren().add(labelCreateShip1);
-        root3.getChildren().add(buttonNextScene3);
-        root3.getChildren().add(labelCreateShip2);
-        root4.getChildren().add(firstPlayer);
-        root5.getChildren().add(secondPlayer);
-        primaryStage.setScene(scene1);
+        roots.get(1).getChildren().add(labelEntryText);
+        roots.get(1).getChildren().add(buttonRules);
+        roots.get(1).getChildren().add(buttonStart);
+        roots.get(2).getChildren().add(buttonNextScene2);
+        roots.get(2).getChildren().add(labelCreateShip1);
+        roots.get(3).getChildren().add(buttonNextScene3);
+        roots.get(3).getChildren().add(labelCreateShip2);
+        roots.get(4).getChildren().add(firstPlayer);
+        roots.get(5).getChildren().add(secondPlayer);
+        primaryStage.setScene(scenes.get(1));
 
 
-        canvas2.setOnMouseClicked(event -> {
+        canvases.get(2).setOnMouseClicked(event -> {
             mouseX = event.getX();
             mouseY = event.getY();
-            int x = getShipX(mouseX);
-            int y = getShipY(mouseY);
-            if (bSingleDeck) {
-                if (ps.canAddShip(x, y, 1, !bHorizontal, PlayerEnum.FIRST)) {
-                    ps.addShip(x, y, 1, !bHorizontal, PlayerEnum.FIRST);
-                    drawCell(gc2, mouseX, mouseY);
-                }
-            }
-            bSingleDeck = singleDeck(gc2, mouseX, mouseY);
-            if (bDoubleDeck) {
-                if (ps.canAddShip(x, y, 2, !bHorizontal, PlayerEnum.FIRST)) {
-                    ps.addShip(x, y, 2, !bHorizontal, PlayerEnum.FIRST);
-                    if (bHorizontal) {
-                        for (int i = 0; i < 2; i++) {
-                            drawCell(gc2, mouseX, mouseY);
-                            mouseX += 20;
-                        }
-                    } else {
-                        for (int i = 0; i < 2; i++) {
-                            drawCell(gc2, mouseX, mouseY);
-                            mouseY += 20;
-                        }
-                    }
-                }
-            }
-            bDoubleDeck = doubleDeck(gc2, mouseX, mouseY);
-            if (bTripleDeck) {
-                if (ps.canAddShip(x, y, 3, !bHorizontal, PlayerEnum.FIRST)) {
-                    ps.addShip(x, y, 3, !bHorizontal, PlayerEnum.FIRST);
-                    if (bHorizontal) {
-                        for (int i = 0; i < 3; i++) {
-                            drawCell(gc2, mouseX, mouseY);
-                            mouseX += 20;
-                        }
-                    } else {
-                        for (int i = 0; i < 3; i++) {
-                            drawCell(gc2, mouseX, mouseY);
-                            mouseY += 20;
-                        }
-                    }
-                }
-            }
-            bTripleDeck = tripleDeck(gc2, mouseX, mouseY);
-            if (bQuadroDeck) {
-                if (ps.canAddShip(x, y, 4, !bHorizontal, PlayerEnum.FIRST)) {
-                    ps.addShip(x, y, 4, !bHorizontal, PlayerEnum.FIRST);
-                    if (bHorizontal) {
-                        for (int i = 0; i < 4; i++) {
-                            drawCell(gc2, mouseX, mouseY);
-                            mouseX += 20;
-                        }
-                    } else {
-                        for (int i = 0; i < 4; i++) {
-                            drawCell(gc2, mouseX, mouseY);
-                            mouseY += 20;
-                        }
-                    }
-                }
-            }
-            bQuadroDeck = quadroDeck(gc2, mouseX, mouseY);
+            canvasMouseClickedAction(gc2, mouseX, mouseY, PlayerEnum.FIRST);
         });
 
 
-        scene2.setOnKeyPressed((keyEvent -> {
+        scenes.get(2).setOnKeyPressed((keyEvent -> {
             drawCell(gc2, 50, 100);
-            if (keyEvent.getCode() == KeyCode.V) {
-                bHorizontal = false;
-                System.out.print("v");
-
-            } else if (keyEvent.getCode() == KeyCode.H) {
-                bHorizontal = true;
-                System.out.println("h");
-            }
+            bHorizontal = keyPressedIdentification(keyEvent.getCode());
         }));
 
 
-        canvas3.setOnMouseClicked(event -> {
+        canvases.get(3).setOnMouseClicked(event -> {
             mouseX = event.getX();
             mouseY = event.getY();
-            int x = getShipX(mouseX);
-            int y = getShipY(mouseY);
-            if (bSingleDeck) {
-                if (ps.canAddShip(x, y, 1, !bHorizontal, PlayerEnum.SECOND)) {
-                    ps.addShip(x, y, 1, !bHorizontal, PlayerEnum.SECOND);
-                    drawCell(gc3, mouseX, mouseY);
-                }
-            }
-            bSingleDeck = singleDeck(gc3, mouseX, mouseY);
-            if (bDoubleDeck) {
-                if (ps.canAddShip(x, y, 2, !bHorizontal, PlayerEnum.SECOND)) {
-                    ps.addShip(x, y, 2, !bHorizontal, PlayerEnum.SECOND);
-                    if (bHorizontal) {
-                        for (int i = 0; i < 2; i++) {
-                            drawCell(gc3, mouseX, mouseY);
-                            mouseX += 20;
-                        }
-                    } else {
-                        for (int i = 0; i < 2; i++) {
-                            drawCell(gc3, mouseX, mouseY);
-                            mouseY += 20;
-                        }
-                    }
-                }
-            }
-            bDoubleDeck = doubleDeck(gc3, mouseX, mouseY);
-            if (bTripleDeck) {
-                if (ps.canAddShip(x, y, 3, !bHorizontal, PlayerEnum.SECOND)) {
-                    ps.addShip(x, y, 3, !bHorizontal, PlayerEnum.SECOND);
-                    if (bHorizontal) {
-                        for (int i = 0; i < 3; i++) {
-                            drawCell(gc3, mouseX, mouseY);
-                            mouseX += 20;
-                        }
-                    } else {
-                        for (int i = 0; i < 3; i++) {
-                            drawCell(gc3, mouseX, mouseY);
-                            mouseY += 20;
-                        }
-                    }
-                }
-            }
-            bTripleDeck = tripleDeck(gc3, mouseX, mouseY);
-            if (bQuadroDeck) {
-                if (ps.canAddShip(x, y, 4, !bHorizontal, PlayerEnum.SECOND)) {
-                    ps.addShip(x, y, 4, !bHorizontal, PlayerEnum.SECOND);
-                    if (bHorizontal) {
-                        for (int i = 0; i < 4; i++) {
-                            drawCell(gc3, mouseX, mouseY);
-                            mouseX += 20;
-                        }
-                    } else {
-                        for (int i = 0; i < 4; i++) {
-                            drawCell(gc3, mouseX, mouseY);
-                            mouseY += 20;
-                        }
-                    }
-                }
-            }
-            bQuadroDeck = quadroDeck(gc3, mouseX, mouseY);
+            canvasMouseClickedAction(gc3, mouseX, mouseY, PlayerEnum.SECOND);
         });
 
-        scene3.setOnKeyPressed((keyEvent -> {
+        scenes.get(3).setOnKeyPressed((keyEvent -> {
             drawCell(gc3, 50, 100);
-            if (keyEvent.getCode() == KeyCode.V) {
-                bHorizontal = false;
-                System.out.print("v");
-
-            } else if (keyEvent.getCode() == KeyCode.H) {
-                bHorizontal = true;
-                System.out.println("h");
-            }
+            bHorizontal = keyPressedIdentification(keyEvent.getCode());
         }));
 
-        canvas4.setOnMouseClicked(event -> {
+        canvases.get(4).setOnMouseClicked(event -> {
             if (!bGameOver) {
                 mouseX = event.getX();
                 mouseY = event.getY();
-                if (mouseX > 450 && mouseX < 650 && mouseY > 100 && mouseY < 300) {
-                    boolean bHit;
-                    int x = getAttackX(mouseX);
-                    int y = getAttackY(mouseY);
-                    if (!ps.isAttack(x, y, PlayerEnum.FIRST)) {
-                        ps.doAttack(x, y, PlayerEnum.FIRST);
-                        bHit = ps.isShipCell(x, y, PlayerEnum.SECOND);
-                        attack(gc4, mouseX, mouseY, bHit);
-                        enemyAttack(gc5, mouseX, mouseY, bHit);
-                        if (bHit) {
-                            if (ps.isShipSunk(x, y, PlayerEnum.SECOND)) {
-                                ps.doShipSunk(x, y, PlayerEnum.SECOND);
-                                List<ShipCell> listOfShipCells = ps.getListOfShipCells(x, y, PlayerEnum.SECOND);
-                                for (ShipCell sc : listOfShipCells) {
-                                    int x0 = sc.getX();
-                                    int y0 = sc.getY();
-                                    int mouseX0 = x0 * 20 + 450 + 5;
-                                    int mouseY0 = y0 * 20 + 100 + 5;
-                                    attack(gc4, mouseX0, mouseY0, false);
-                                    attack(gc4, mouseX0 + 20, mouseY0 + 20, false);
-                                    attack(gc4, mouseX0 + 20, mouseY0, !bHit);
-                                    attack(gc4, mouseX0 + 20, mouseY0 - 20, !bHit);
-                                    attack(gc4, mouseX0, mouseY0 + 20, !bHit);
-                                    attack(gc4, mouseX0, mouseY0 - 20, !bHit);
-                                    attack(gc4, mouseX0 - 20, mouseY0 + 20, !bHit);
-                                    attack(gc4, mouseX0 - 20, mouseY0, !bHit);
-                                    attack(gc4, mouseX0 - 20, mouseY0 - 20, !bHit);
-                                }
-                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                                alert.setTitle("корабль подбит");
-                                alert.setHeaderText("корабль подбит");
-                                alert.showAndWait();
-
-                            }
-                        }
-                        if (ps.isPlayerLoss(PlayerEnum.SECOND)) {
-                            bGameOver =true;
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                            alert.setTitle("Конец игры");
-                            alert.setHeaderText("Игрок №1 выиграл");
-                            alert.showAndWait();
-                        }
-                        if (!bHit) {
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                            alert.setTitle("Промах");
-                            alert.setHeaderText("Промах!");
-                            alert.showAndWait();
-                            root4.setVisible(false);
-                            alert.setTitle("Смена игрока");
-                            alert.setHeaderText("Игроку №2 приготовиться");
-                            alert.showAndWait();
-                            root5.setVisible(true);
-                            primaryStage.setScene(scene5);
-                            primaryStage.show();
-                        }
-                    }
-                }
+                enemyMouseAction(primaryStage, mouseX, mouseY, PlayerEnum.FIRST);
             }
         });
 
 
-        canvas5.setOnMouseClicked(event -> {
-            if(!bGameOver){
-            mouseX = event.getX();
-            mouseY = event.getY();
-            if (mouseX > 450 && mouseX < 650 && mouseY > 100 && mouseY < 300) {
-                boolean bHit;
-                int x = getAttackX(mouseX);
-                int y = getAttackY(mouseY);
-                if (!ps.isAttack(x, y, PlayerEnum.SECOND)) {
-                    ps.doAttack(x, y, PlayerEnum.SECOND);
-                    bHit = ps.isShipCell(x, y, PlayerEnum.FIRST);
-                    attack(gc5, mouseX, mouseY, bHit);
-                    enemyAttack(gc4, mouseX, mouseY, bHit);
-                    if (ps.isPlayerLoss(PlayerEnum.FIRST)) {
-                        bGameOver = true;
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Конец игры");
-                        alert.setHeaderText("Игрок №2 выиграл");
-                        alert.showAndWait();
-                    }
-                    if (!bHit) {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Промах");
-                        alert.setHeaderText("Промах!");
-                        alert.showAndWait();
-                        root5.setVisible(false);
-                        alert.setTitle("Смена игрока");
-                        alert.setHeaderText("Игроку №2 приготовиться");
-                        alert.showAndWait();
-                        root4.setVisible(true);
-                        primaryStage.setScene(scene4);
-                        primaryStage.show();
-                    }
-                }
-            }}
+        canvases.get(5).setOnMouseClicked(event -> {
+            if (!bGameOver) {
+                mouseX = event.getX();
+                mouseY = event.getY();
+                enemyMouseAction(primaryStage, mouseX, mouseY, PlayerEnum.SECOND);
+            }
         });
 
         primaryStage.show();
@@ -560,44 +327,34 @@ public class Main extends Application {
         }
     }
 
-    private void attack(GraphicsContext gc, double x, double y, boolean bHit) {
+    private void attack(GraphicsContext gc, double x, double y, boolean bHit, boolean isEnemyAttack) {
         if (x > 450 && x < 650 && y > 100 && y < 300) {
             int i = (int) (x - 50) / 20;
             int j = (int) (y - 100) / 20;
             int w = 20;
             if (!bHit) {
-                int rect_x = i * w + 6;
+                int rect_x;
+                if (!isEnemyAttack) {
+                    rect_x = i * w + 6;
+                } else {
+                    rect_x = i * w + 6 - 400;
+                }
                 int rect_y = j * w + 6;
                 gc.setFill(Color.GREEN);
                 gc.fillRect(rect_x + 50, rect_y + 100, w - 12, w - 12);
             } else {
-                int rect_x = i * w;
+                int rect_x;
+                if (!isEnemyAttack) {
+                    rect_x = i * w;
+                } else {
+                    rect_x = i * w - 400;
+                }
                 int rect_y = j * w;
                 gc.setFill(Color.RED);
                 gc.fillRect(rect_x + 50, rect_y + 100, w, w);
             }
         }
     }
-
-    private void enemyAttack(GraphicsContext gc, double x, double y, boolean bHit) {
-        if (x > 450 && x < 650 && y > 100 && y < 300) {
-            int i = (int) (x - 50) / 20;
-            int j = (int) (y - 100) / 20;
-            int w = 20;
-            if (!bHit) {
-                int rect_x = i * w + 6 - 400;
-                int rect_y = j * w + 6;
-                gc.setFill(Color.GREEN);
-                gc.fillRect(rect_x + 50, rect_y + 100, w - 12, w - 12);
-            } else {
-                int rect_x = i * w - 400;
-                int rect_y = j * w;
-                gc.setFill(Color.RED);
-                gc.fillRect(rect_x + 50, rect_y + 100, w, w);
-            }
-        }
-    }
-
 
     private int getShipX(double mouseX) {
         return (int) (mouseX - 50) / 20;
@@ -624,5 +381,181 @@ public class Main extends Application {
 
     private int getAttackY(double mouseY) {
         return (int) (mouseY - 100) / 20;
+    }
+
+    private void initRoots() {
+        for (int i = 1; i <= 5; i++) {
+            Group root = new Group();
+            Scene scene = new Scene(root);
+            Canvas canvas = new Canvas(800, 600);
+            root.getChildren().add(canvas);
+            roots.put(i, root);
+            scenes.put(i, scene);
+            canvases.put(i, canvas);
+        }
+    }
+
+    private void canvasMouseClickedAction(GraphicsContext gc, double mouseX, double mouseY, PlayerEnum player) {
+        int x = getShipX(mouseX);
+        int y = getShipY(mouseY);
+        if (bSingleDeck) {
+            if (ps.canAddShip(x, y, 1, !bHorizontal, player)) {
+                ps.addShip(x, y, 1, !bHorizontal, player);
+                drawCell(gc, mouseX, mouseY);
+            }
+        }
+        bSingleDeck = singleDeck(gc, mouseX, mouseY);
+        if (bDoubleDeck) {
+            if (ps.canAddShip(x, y, 2, !bHorizontal, player)) {
+                ps.addShip(x, y, 2, !bHorizontal, player);
+                if (bHorizontal) {
+                    for (int i = 0; i < 2; i++) {
+                        drawCell(gc, mouseX, mouseY);
+                        mouseX += 20;
+                    }
+                } else {
+                    for (int i = 0; i < 2; i++) {
+                        drawCell(gc, mouseX, mouseY);
+                        mouseY += 20;
+                    }
+                }
+            }
+        }
+        bDoubleDeck = doubleDeck(gc, mouseX, mouseY);
+        if (bTripleDeck) {
+            if (ps.canAddShip(x, y, 3, !bHorizontal, player)) {
+                ps.addShip(x, y, 3, !bHorizontal, player);
+                if (bHorizontal) {
+                    for (int i = 0; i < 3; i++) {
+                        drawCell(gc, mouseX, mouseY);
+                        mouseX += 20;
+                    }
+                } else {
+                    for (int i = 0; i < 3; i++) {
+                        drawCell(gc, mouseX, mouseY);
+                        mouseY += 20;
+                    }
+                }
+            }
+        }
+        bTripleDeck = tripleDeck(gc, mouseX, mouseY);
+        if (bQuadroDeck) {
+            if (ps.canAddShip(x, y, 4, !bHorizontal, player)) {
+                ps.addShip(x, y, 4, !bHorizontal, player);
+                if (bHorizontal) {
+                    for (int i = 0; i < 4; i++) {
+                        drawCell(gc, mouseX, mouseY);
+                        mouseX += 20;
+                    }
+                } else {
+                    for (int i = 0; i < 4; i++) {
+                        drawCell(gc, mouseX, mouseY);
+                        mouseY += 20;
+                    }
+                }
+            }
+        }
+        bQuadroDeck = quadroDeck(gc, mouseX, mouseY);
+    }
+
+    private boolean keyPressedIdentification(KeyCode keyCode) {
+        if (keyCode == KeyCode.V) {
+            bHorizontal = false;
+        } else if (keyCode == KeyCode.H) {
+            bHorizontal = true;
+        }
+        return bHorizontal;
+    }
+
+    private void enemyMouseAction(Stage primaryStage, double mouseX, double mouseY, PlayerEnum currentPlayer) {
+        if (mouseX > 450 && mouseX < 650 && mouseY > 100 && mouseY < 300) {
+            PlayerEnum nextPlayer;
+            GraphicsContext currentGC;
+            GraphicsContext nextGC;
+            String txt01;
+            String txt02;
+            Group currentGroup;
+            Group nextGroup;
+            Scene nextScene;
+
+            if (currentPlayer == PlayerEnum.FIRST) {
+                currentGC = canvases.get(4).getGraphicsContext2D();
+                nextPlayer = PlayerEnum.SECOND;
+                nextGC = canvases.get(5).getGraphicsContext2D();
+                txt01 = "№1";
+                txt02 = "№2";
+                currentGroup = roots.get(4);
+                nextGroup = roots.get(5);
+                nextScene = scenes.get(5);
+
+            } else {
+                currentGC = canvases.get(5).getGraphicsContext2D();
+                nextPlayer = PlayerEnum.FIRST;
+                nextGC = canvases.get(4).getGraphicsContext2D();
+                txt01 = "№2";
+                txt02 = "№1";
+                currentGroup = roots.get(5);
+                nextGroup = roots.get(4);
+                nextScene = scenes.get(4);
+            }
+
+
+            boolean bHit;
+            int x = getAttackX(mouseX);
+            int y = getAttackY(mouseY);
+            if (!ps.isAttack(x, y, currentPlayer)) {
+                ps.doAttack(x, y, currentPlayer);
+                bHit = ps.isShipCell(x, y, nextPlayer);
+                attack(currentGC, mouseX, mouseY, bHit, false);
+                attack(nextGC, mouseX, mouseY, bHit, true);
+                if (bHit) {
+                    if (ps.isShipSunk(x, y, nextPlayer)) {
+                        ps.doShipSunk(x, y, nextPlayer);
+                        List<ShipCell> listOfShipCells = ps.getListOfShipCells(x, y, nextPlayer);
+                        for (ShipCell sc : listOfShipCells) {
+                            int x0 = sc.getX();
+                            int y0 = sc.getY();
+                            int mouseX0 = x0 * 20 + 450 + 5;
+                            int mouseY0 = y0 * 20 + 100 + 5;
+                            attack(currentGC, mouseX0, mouseY0, false, false);
+                            attack(currentGC, mouseX0 + 20, mouseY0 + 20, false, false);
+                            attack(currentGC, mouseX0 + 20, mouseY0, false, false);
+                            attack(currentGC, mouseX0 + 20, mouseY0 - 20, false, false);
+                            attack(currentGC, mouseX0, mouseY0 + 20, false, false);
+                            attack(currentGC, mouseX0, mouseY0 - 20, false, false);
+                            attack(currentGC, mouseX0 - 20, mouseY0 + 20, false, false);
+                            attack(currentGC, mouseX0 - 20, mouseY0, false, false);
+                            attack(currentGC, mouseX0 - 20, mouseY0 - 20, false, false);
+                        }
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Корабль потоплен.");
+                        alert.setHeaderText("Корабль потоплен.");
+                        alert.showAndWait();
+
+                    }
+                }
+                if (ps.isPlayerLoss(nextPlayer)) {
+                    bGameOver = true;
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Конец игры");
+                    alert.setHeaderText("Игрок " + txt01 + " выиграл");
+                    alert.showAndWait();
+                }
+                if (!bHit) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Промах");
+                    alert.setHeaderText("Промах!");
+                    alert.showAndWait();
+                    currentGroup.setVisible(false);
+                    alert.setTitle("Смена игрока");
+                    alert.setHeaderText("Игроку " + txt02 + " приготовиться");
+                    alert.showAndWait();
+                    nextGroup.setVisible(true);
+                    primaryStage.setScene(nextScene);
+                    primaryStage.show();
+                }
+            }
+        }
+
     }
 }

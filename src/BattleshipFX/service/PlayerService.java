@@ -100,22 +100,29 @@ public class PlayerService {
     }
 
     public void doShipSunk(int x, int y, PlayerEnum player) {
+        PlayerEnum nextPlayer;
+        if (player == PlayerEnum.FIRST) {
+            nextPlayer = PlayerEnum.SECOND;
+        } else {
+            nextPlayer = PlayerEnum.FIRST;
+        }
         Ship ship = getCurrentPlayer(player).getShipsCell(x, y).getShip();
         List<ShipCell> shipCells = ship.getListOfShipCells();
         for (ShipCell sc : shipCells) {
             int x0 = sc.getX();
             int y0 = sc.getY();
-            doAttack(x0 + 1, y0 + 1, player);
-            doAttack(x0 + 1, y0, player);
-            doAttack(x0 + 1, y0 - 1, player);
-            doAttack(x0, y0 + 1, player);
-            doAttack(x0, y0 - 1, player);
-            doAttack(x0 - 1, y0 + 1, player);
-            doAttack(x0 - 1, y0, player);
-            doAttack(x0 - 1, y0 - 1, player);
+            doAttack(x0 + 1, y0 + 1, nextPlayer);
+            doAttack(x0 + 1, y0, nextPlayer);
+            doAttack(x0 + 1, y0 - 1, nextPlayer);
+            doAttack(x0, y0 + 1, nextPlayer);
+            doAttack(x0, y0 - 1, nextPlayer);
+            doAttack(x0 - 1, y0 + 1, nextPlayer);
+            doAttack(x0 - 1, y0, nextPlayer);
+            doAttack(x0 - 1, y0 - 1, nextPlayer);
         }
     }
-    public List<ShipCell> getListOfShipCells(int x, int y, PlayerEnum player){
+
+    public List<ShipCell> getListOfShipCells(int x, int y, PlayerEnum player) {
         Ship ship = getCurrentPlayer(player).getShipsCell(x, y).getShip();
         return ship.getListOfShipCells();
     }
